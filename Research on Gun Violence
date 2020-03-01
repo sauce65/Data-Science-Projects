@@ -1,0 +1,81 @@
+import csv
+import pandas as pd
+import datetime
+from matplotlib import pyplot as plt
+with open('gun.csv.csv', newline = '', encoding="utf8") as gun:
+    g = pd.read_csv(gun) #https://www.kaggle.com/jameslko/gun-violence-data
+with open('pop.csv', newline = '', encoding="utf8") as pop:
+    p = pd.read_csv(pop) #https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+with open('raw-thoughtco-guns-by-state.txt') as guncount:
+    guns = pd.read_table(guncount) #https://www.kaggle.com/solorzano/gun-ownership-by-state/data#
+
+
+
+p = p[['NAME', 'POPESTIMATE2019']]
+p.columns = ['state', 'pop']
+
+
+
+g = g[['state', 'incident_id']]
+g.columns = ['state', 'c']
+g = g.groupby('state')
+g = g.count()
+
+
+j = g.merge(p, how='left',on='state')
+
+
+pct_pop = []
+jc = j['c']
+jpop = j['pop']
+jstates = j['state']
+for i in range(len(j['state'])):
+    pct = jc[i] / jpop[i]
+    pct_pop.append(pct)
+
+"""
+plt.scatter(jpop, pct_pop) #shows that gun incidents as percent of state pop stays flat
+plt.xlabel('population')
+plt.ylabel('incidents as % of pop')
+plt.show()"""
+
+rating = [4,5,5,3,1,3,3,2,2,4,4,1,5,2,4,3,5,4,3,5,1,2,3,2,5,5,4,3,3,5,1,4,1,4,4,4,4,3,4,3,3,4,4,4,4,5,4,3,5,4,5]
+"""plt.scatter(rating, pct_pop) #correlates gun law rating by pro-gun site gunstocarry.com (https://www.gunstocarry.com/gun-laws-state/) to shootings as a percentage of population, no clear relationship found
+plt.show()
+plt.close()
+plt.scatter(rating, jc)
+plt.show()"""
+    # TODO: remove outliers and compare to other dataset
+
+gpc = guns[['state', 'guns_per_capita']]
+gpc2 = gpc.sort_values(by='state')
+gpc2 = gpc2.reset_index(drop= True)
+
+gpc3 = gpc2[gpc2.state != 'District of Columbia']
+gpc3 = gpc3.reset_index(drop= True)
+firearm_death_rates = [21.5,23.3,5.0,17.8,7.9,14.3,4.6,11.0,12.6,15.0,4.5,14.6,11.7,15.0,9.2,13.4,17.5,21.3,8.3,47.92,3.4,12.3,7.6,19.9,19,18.9,9.1,16.8,9.3,5.5,18.1,4.4,13.7,11.9,12.9,19.6,11.9,12.0,4.1,17.7,13.4,17.1,12.1,12.9,11.1,12.1,9.0,17.5,11.4,17.4]
+"""plt.scatter(gpc2['guns_per_capita'], pct_pop)
+plt.show()
+plt.close()
+plt.scatter(gpc2['guns_per_capita'], jc)
+plt.show()
+plt.close()"""
+    # TODO: remove outliers and compare to other dataset
+
+plt.scatter(gpc3['guns_per_capita'], firearm_death_rates)
+plt.show()
+plt.close()
+gpc4 = gpc3[gpc3.guns_per_capita != 18.450]
+gpc4 = gpc4[gpc4.guns_per_capita != 229.240]
+gpc4 = gpc4.reset_index(drop= True)
+
+firearm_death_rates.pop(37)
+firearm_death_rates.pop(48)
+
+plt.scatter(gpc4['guns_per_capita'], firearm_death_rates)
+plt.show()
+plt.close()
+
+rating = [4,5,5,3,1,3,3,2,4,4,1,5,2,4,3,5,4,3,5,1,2,3,2,5,5,4,3,3,5,1,4,1,4,4,4,4,4,3,3,4,4,4,4,5,4,3,5,4]
+plt.scatter(rating, firearm_death_rates)
+plt.show()
